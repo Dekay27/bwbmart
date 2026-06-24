@@ -54,20 +54,37 @@
         }
 
         function sendViaHttpApi(eventName, properties) {
+            var payload = JSON.stringify({
+                api_key: 'c378329053030ac8d3b4c81a3cff6ef0',
+                events: [{
+                    device_id: getBrowserDeviceId(),
+                    event_type: eventName,
+                    event_properties: properties
+                }]
+            });
+
+            if (navigator.sendBeacon) {
+                var sent = navigator.sendBeacon(
+                    'https://api2.amplitude.com/2/httpapi',
+                    new Blob([payload], {type: 'text/plain'})
+                );
+
+                if (sent) {
+                    console.log('Amplitude HTTP API fallback queued:', eventName);
+                    return Promise.resolve();
+                }
+            }
+
             return fetch('https://api2.amplitude.com/2/httpapi', {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'text/plain',
                     'Accept': '*/*'
                 },
-                body: JSON.stringify({
-                    api_key: 'c378329053030ac8d3b4c81a3cff6ef0',
-                    events: [{
-                        device_id: getBrowserDeviceId(),
-                        event_type: eventName,
-                        event_properties: properties
-                    }]
-                })
+                body: payload
+            }).catch(function(error) {
+                console.error('Amplitude HTTP API fallback failed:', error);
             });
         }
 
