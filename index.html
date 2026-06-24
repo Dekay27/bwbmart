@@ -9,7 +9,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 
     <!-- 2. Initialize Amplitude with Session Replay and Autocapture -->
-    <script src="https://cdn.amplitude.com/script/c378329053030ac8d3b4c81a3cff6ef0.js"></script><script>window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));window.amplitude.init('c378329053030ac8d3b4c81a3cff6ef0', {"fetchRemoteConfig":true,"autocapture":true});</script>
+    <script src="https://cdn.amplitude.com/script/c378329053030ac8d3b4c81a3cff6ef0.js"></script>
+    <script>
+        if (window.amplitude && window.sessionReplay) {
+            window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+            window.amplitude.init('c378329053030ac8d3b4c81a3cff6ef0', {
+                fetchRemoteConfig: true,
+                autocapture: true
+            });
+        } else {
+            console.warn('Amplitude SDK did not load. Button clicks will use the HTTP API fallback.');
+        }
+    </script>
 </head>
 <body>
     <main class="container" style="max-width: 600px; margin-top: 100px; text-align: center;">
