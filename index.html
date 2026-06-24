@@ -8,18 +8,8 @@
     <!-- 1. Stylized layout using a lightweight modern CSS framework -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 
-    <!-- 2. Initialize Amplitude Browser SDK via CDN -->
-    <script type="text/javascript">
-        !function(e,t){var n=e.amplitude||{_q:[],_iq:{}};if(n.invoked)e.console&&console.error&&console.error("Amplitude snippet has been loaded.");else{var r=function(e,t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)))}};r(n,"add"),r(n,"append"),r(n,"clearAll"),r(n,"prepend"),r(n,"set"),r(n,"setOnce"),r(n,"unset"),r(n,"preInsert"),r(n,"postInsert"),r(n,"remove"),r(n,"getUserProperties"),r(n,"getUserId"),r(n,"getDeviceId"),r(n,"getSessionId"),r(n,"getUserIdAsync"),r(n,"getDeviceIdAsync"),r(n,"getSessionIdAsync"),r(n,"getEventProperties"),r(n,"setUserId"),r(n,"setDeviceId"),r(n,"setSessionId"),r(n,"setGroup"),r(n,"clearUserProperties"),r(n,"setInputSetting"),r(n,"setOptOut"),r(n,"setTransport"),r(n,"identify"),r(n,"groupIdentify"),r(n,"track"),r(n,"trackWithGroups"),r(n,"revenue"),r(n,"revenueWithGroups"),r(n,"reset");var s=function(e,t,n){e[t]=function(){var r={promise:new Promise((function(t){e._q.push([n,Array.prototype.slice.call(arguments,0),t])}))};return r}};s(n,"getDeviceIdAsync","getDeviceIdAsync"),s(n,"getUserIdAsync","getUserIdAsync"),s(n,"getSessionIdAsync","getSessionIdAsync");var o=["init","add","append","clearAll","prepend","set","setOnce","unset","preInsert","postInsert","remove","getUserProperties","getUserId","getDeviceId","getSessionId","getUserIdAsync","getDeviceIdAsync","getSessionIdAsync","getEventProperties","setUserId","setDeviceId","setSessionId","setGroup","clearUserProperties","setInputSetting","setOptOut","setTransport","identify","groupIdentify","track","trackWithGroups","revenue","revenueWithGroups","reset"];function i(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)))}}for(var n=0;n<o.length;n++)t(o[n])}n.getInstance=function(e){return e=e||"_instance",n._iq[e]||(n._iq[e]={_q:[]},i(n._iq[e])),n._iq[e]},e.amplitude=n;var a=t.createElement("script");a.type="text/javascript",a.integrity="sha384-Y2iI6H7GfXb5f/pXj+S+96bKxV5N1cAtPZ+i69UWe0z1yX5jN3yJ2Z997Rz7A4X5",a.crossOrigin="anonymous",a.async=!0,a.src="https://cdn.amplitude.com/libs/analytics-browser-2.11.1-min.js.gz",a.onload=function(){e.amplitude.runQueuedFunctions?e.amplitude.runQueuedFunctions():console.log("[Amplitude] Error: could not load SDK")};var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(a,c)}(window,document);
-        
-        // 3. Configure and Initialize with your specific API Key
-        amplitude.init('c378329053030ac8d3b4c81a3cff6ef0', {
-            defaultTracking: {
-                pageViews: true, // Automatically captures standard page view events
-                sessions: true
-            }
-        });
-    </script>
+    <!-- 2. Initialize Amplitude with Session Replay and Autocapture -->
+    <script src="https://cdn.amplitude.com/script/c378329053030ac8d3b4c81a3cff6ef0.js"></script><script>window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));window.amplitude.init('c378329053030ac8d3b4c81a3cff6ef0', {"fetchRemoteConfig":true,"autocapture":true});</script>
 </head>
 <body>
     <main class="container" style="max-width: 600px; margin-top: 100px; text-align: center;">
@@ -35,22 +25,22 @@
         </div>
     </main>
 
-    <!-- 5. Dynamic tracking script mapping clicks to backend events -->
+    <!-- 5. Dynamic tracking script for all buttons -->
     <script>
-        document.getElementById('signup-btn').addEventListener('click', function() {
-            amplitude.track('Clicked CTA', { 
-                'button_name': 'Sign Up',
-                'location': 'hero_section'
-            });
-            alert('Sign Up event sent to Amplitude!');
-        });
+        document.querySelectorAll('button').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var buttonName = button.textContent.trim() || button.id || 'Unnamed Button';
 
-        document.getElementById('demo-btn').addEventListener('click', function() {
-            amplitude.track('Clicked CTA', { 
-                'button_name': 'Request Demo',
-                'location': 'hero_section'
+                amplitude.track(buttonName, {
+                    button_name: buttonName,
+                    button_id: button.id || null,
+                    button_class: button.className || null,
+                    page_title: document.title,
+                    page_path: window.location.pathname
+                });
+
+                alert(buttonName + ' event sent to Amplitude!');
             });
-            alert('Request Demo event sent to Amplitude!');
         });
     </script>
 </body>
