@@ -27,19 +27,72 @@
 
     <!-- 5. Dynamic tracking script for all buttons -->
     <script>
+        function getBrowserDeviceId() {
+            var storageKey = 'amplitude_demo_device_id';
+            var deviceId = localStorage.getItem(storageKey);
+
+            if (!deviceId) {
+                deviceId = 'browser-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+                localStorage.setItem(storageKey, deviceId);
+            }
+
+            return deviceId;
+        }
+
+        function sendViaHttpApi(eventName, properties) {
+            return fetch('https://api2.amplitude.com/2/httpapi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': '*/*'
+                },
+                body: JSON.stringify({
+                    api_key: 'c378329053030ac8d3b4c81a3cff6ef0',
+                    events: [{
+                        device_id: getBrowserDeviceId(),
+                        event_type: eventName,
+                        event_properties: properties
+                    }]
+                })
+            });
+        }
+
+        function trackButtonClick(button) {
+            var buttonName = button.textContent.trim() || button.id || 'Unnamed Button';
+            var eventProperties = {
+                button_name: buttonName,
+                button_id: button.id || null,
+                button_class: button.className || null,
+                page_title: document.title,
+                page_path: window.location.pathname
+            };
+
+            if (!window.amplitude || typeof window.amplitude.track !== 'function') {
+                console.warn('Amplitude SDK unavailable. Sending event through HTTP API fallback.');
+                sendViaHttpApi(buttonName, eventProperties);
+                alert(buttonName + ' event sent to Amplitude!');
+                return;
+            }
+
+            var event = window.amplitude.track(buttonName, eventProperties);
+
+            if (event && event.promise) {
+                event.promise
+                    .then(function(result) {
+                        console.log('Amplitude event sent:', buttonName, result);
+                    })
+                    .catch(function(error) {
+                        console.error('Amplitude SDK send failed. Trying HTTP API fallback.', error);
+                        sendViaHttpApi(buttonName, eventProperties);
+                    });
+            }
+
+            alert(buttonName + ' event sent to Amplitude!');
+        }
+
         document.querySelectorAll('button').forEach(function(button) {
             button.addEventListener('click', function() {
-                var buttonName = button.textContent.trim() || button.id || 'Unnamed Button';
-
-                amplitude.track(buttonName, {
-                    button_name: buttonName,
-                    button_id: button.id || null,
-                    button_class: button.className || null,
-                    page_title: document.title,
-                    page_path: window.location.pathname
-                });
-
-                alert(buttonName + ' event sent to Amplitude!');
+                trackButtonClick(button);
             });
         });
     </script>
